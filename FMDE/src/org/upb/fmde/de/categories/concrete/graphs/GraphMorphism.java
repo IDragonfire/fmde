@@ -3,6 +3,7 @@ package org.upb.fmde.de.categories.concrete.graphs;
 import org.upb.fmde.de.categories.Category;
 import org.upb.fmde.de.categories.ComparableArrow;
 import org.upb.fmde.de.categories.LabelledArrow;
+import org.upb.fmde.de.categories.concrete.finsets.FinSets;
 import org.upb.fmde.de.categories.concrete.finsets.TotalFunction;
 
 public class GraphMorphism extends LabelledArrow<Graph> implements ComparableArrow<GraphMorphism> {
@@ -28,7 +29,13 @@ public class GraphMorphism extends LabelledArrow<Graph> implements ComparableArr
 
 	private boolean isStructurePreserving() {
 		// TODO (01) Implement check for structure preservation
-		throw new UnsupportedOperationException("Has not yet been implemented.");
+		TotalFunction trg1_fV = FinSets.FinSets.compose(src().trg(), _V());
+		TotalFunction fE_trg2 = FinSets.FinSets.compose(_E(), trg().trg());
+		
+		TotalFunction src1_FV =  FinSets.FinSets.compose(src().src(), _V());
+		TotalFunction fE_src2 = FinSets.FinSets.compose(_E(), trg().src());
+		
+		return trg1_fV.isTheSameAs(fE_trg2) && src1_FV.isTheSameAs(fE_src2);
 	}
 
 	public TotalFunction _E(){
@@ -42,6 +49,6 @@ public class GraphMorphism extends LabelledArrow<Graph> implements ComparableArr
 	@Override
 	public boolean isTheSameAs(GraphMorphism a) {
 		// TODO (02) Equality check for graph morphisms
-		throw new UnsupportedOperationException("Has not yet been implemented.");	
+		return _E().isTheSameAs(a._E()) && _V().isTheSameAs(a._V());
 	}
 }

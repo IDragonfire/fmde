@@ -1,6 +1,8 @@
 package org.upb.fmde.de.categories.concrete.typedtriplegraphs;
 
 import org.upb.fmde.de.categories.LabelledCategory;
+import org.upb.fmde.de.categories.concrete.triplegraphs.TripleGraphs;
+import org.upb.fmde.de.categories.concrete.triplegraphs.TripleMorphism;
 
 public class TypedTripleGraphs implements LabelledCategory<TTripleGraph, TTripleMorphism> {
 
@@ -9,15 +11,17 @@ public class TypedTripleGraphs implements LabelledCategory<TTripleGraph, TTriple
 	@Override
 	public TTripleMorphism compose(TTripleMorphism f, TTripleMorphism g) {
 		// TODO (15) Composition
-		throw new UnsupportedOperationException("Has not yet been implemented.");
+		TripleMorphism t = TripleGraphs.TripleGraphs.compose(f.getUntypedMorphism(), g.getUntypedMorphism());
+		return new TTripleMorphism(f.label() + ";" + g.label(), t, f.src(), f.trg());
 	}
 
 	@Override
 	public TTripleMorphism id(TTripleGraph o) {
 		// TODO (16) id
-		throw new UnsupportedOperationException("Has not yet been implemented.");
+		TripleMorphism f = TripleGraphs.TripleGraphs.id(o.getTypeMorphism().src());
+		return new TTripleMorphism("id " + o.label(), f, o, o);
 	}
-	
+
 	@Override
 	public String showOb(TTripleGraph o) {
 		return LabelledCategory.super.showOb(o) + ":" + o.getTypeMorphism().trg().label();
