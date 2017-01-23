@@ -39,7 +39,7 @@ public class TestRuleRefinement {
 
 	private Graph createHostGraph() {
 		FinSet edges = new FinSet("Host Graph Edges");
-		FinSet vertices = new FinSet("Host Graph Vertices", Arrays.asList("B"));
+		FinSet vertices = new FinSet("Host Graph Vertices", Arrays.asList(new String("B")));
 		TotalFunction src = new TotalFunction(edges, "src arrow", vertices);
 		TotalFunction target = new TotalFunction(edges, "trg arrow", vertices);
 		Graph g = new Graph("Host Graph", edges, vertices, src, target);
@@ -48,10 +48,10 @@ public class TestRuleRefinement {
 
 	private Graph createAppendCardGraph() {
 		FinSet edges = new FinSet("Edges", Arrays.asList("B -> C"));
-		FinSet vertices = new FinSet("vertices", Arrays.asList("B", "C"));
+		FinSet vertices = new FinSet("vertices", Arrays.asList(new String("B"), "C"));
 
 		TotalFunction srcFunction = new TotalFunction(edges, "src arrow",vertices);
-		srcFunction.addMapping("B -> C", "B");
+		srcFunction.addMapping("B -> C", new String("B"));
 		TotalFunction targetFunction = new TotalFunction(edges, "trg arrow",
 				vertices);
 		targetFunction.addMapping("B -> C", "C");
@@ -63,20 +63,20 @@ public class TestRuleRefinement {
 		Graph right = createAppendCardGraph();
 		TotalFunction edgeArrow = new TotalFunction(left.edges(), "edge arrow", right.edges());
 		TotalFunction verticeFunction = new TotalFunction(left.vertices(), "vertice arrow", right.vertices());
-		verticeFunction.addMapping("B", "B");
+		verticeFunction.addMapping(new String("B"), new String("B"));
 		GraphMorphism morph = new GraphMorphism("append Card", left, right, edgeArrow, verticeFunction);
 		return morph;
 	}
 
 	private Graph createPreappendCardGraph() {
 		FinSet edges = new FinSet("Edges", Arrays.asList("A -> B"));
-		FinSet vertices = new FinSet("vertices", Arrays.asList("A", "B"));
+		FinSet vertices = new FinSet("vertices", Arrays.asList("A", new String("B")));
 
 		TotalFunction srcFunction = new TotalFunction(edges, "src arrow",vertices);
 		srcFunction.addMapping("A -> B", "A");
 		TotalFunction targetFunction = new TotalFunction(edges, "trg arrow",
 				vertices);
-		targetFunction.addMapping("A -> B", "B");
+		targetFunction.addMapping("A -> B", new String("B"));
 		return new Graph("Right Side of Rule", edges, vertices, srcFunction, targetFunction);
 	}
 
@@ -85,7 +85,7 @@ public class TestRuleRefinement {
 		Graph right = createPreappendCardGraph();
 		TotalFunction edgeArrow = new TotalFunction(left.edges(), "edge arrow", right.edges());
 		TotalFunction verticeFunction = new TotalFunction(left.vertices(), "vertice arrow", right.vertices());
-		verticeFunction.addMapping("B", "B");
+		verticeFunction.addMapping(new String("B"), new String("B"));
 		GraphMorphism morph = new GraphMorphism("append Card", left, right, edgeArrow, verticeFunction);
 		return morph;
 	}

@@ -181,7 +181,6 @@ public class Graphs implements LabelledCategory<Graph, GraphMorphism>, CategoryW
 	@Override
 	public Graph extract(Graph L, Graph L_Prime) {
 		FinSet vertices = new FinSet("vertices of L~", new ArrayList<Object>());
-
 		// helper to find faster vertices
 		HashSet<String> baseVertices = new HashSet<String>();
 
@@ -190,7 +189,7 @@ public class Graphs implements LabelledCategory<Graph, GraphMorphism>, CategoryW
 				.anyMatch(innerVertice -> ((String) vertice).equals((String) innerVertice));
 
 		L.vertices().elts().stream().filter(innermatch).forEach(vertice -> {
-			vertices.elts().add(vertice);
+			vertices.elts().add(new String((String) vertice));
 			baseVertices.add((String) vertice);
 		});
 
