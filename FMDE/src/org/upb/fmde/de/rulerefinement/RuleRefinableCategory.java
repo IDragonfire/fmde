@@ -1,6 +1,7 @@
 package org.upb.fmde.de.rulerefinement;
 
 import org.upb.fmde.de.categories.colimits.pushouts.CategoryWithPushouts;
+import org.upb.fmde.de.categories.colimits.pushouts.Corner;
 
 public interface RuleRefinableCategory<Ob, Arr> 
 	extends CategoryWithPushouts<Ob,Arr> {
@@ -18,4 +19,6 @@ public interface RuleRefinableCategory<Ob, Arr>
 	 * @return L_Tilde -> L
 	 */
 	public Arr buildArrow(Ob L_Tilde, Ob L);
+	
+	public Corner<Arr> epiMonoFactorize(Arr a);
 }

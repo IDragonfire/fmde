@@ -1,5 +1,7 @@
 package org.upb.fmde.de.rulerefinement;
 
+import java.util.List;
+
 import org.upb.fmde.de.categories.colimits.CoLimit;
 import org.upb.fmde.de.categories.colimits.pushouts.CoSpan;
 import org.upb.fmde.de.categories.colimits.pushouts.Span;
@@ -41,5 +43,40 @@ public class RuleRefiner<
 		
 		Arr rule_r_star = pushout_L.up.apply(pushout_R.obj);
 		return rule_r_star;
+	}
+	
+	public Arr merge(List<Arr> rules) {
+		if (rules.size() < 1)
+			throw new IllegalArgumentException("List must contain at least one rule!");
+		else if (rules.size() == 1)
+			return rules.get(0);
+		
+		Ob L_i = c.source(rules.get(0));
+		Ob R_i = c.target(rules.get(0));
+		CoLimit<CoSpan<Arr>, Arr> L_Bar_coProduct;
+		CoLimit<CoSpan<Arr>, Arr> R_Bar_coProduct;
+		Arr r_Bar = rules.get(0);
+		
+		for (int i = 1; i < rules.size(); i++) {
+			L_Bar_coProduct = c.coproduct(L_i, c.source(rules.get(i)));
+			R_Bar_coProduct = c.coproduct(R_i, c.target(rules.get(i)));
+			
+			r_Bar = L_Bar_coProduct.up.apply(new CoSpan<Arr>(c,
+															 c.compose(r_Bar, R_Bar_coProduct.obj.vert),
+															 c.compose(rules.get(i), R_Bar_coProduct.obj.horiz)));
+			
+			L_i = c.target(L_Bar_coProduct.obj.horiz);
+			R_i = c.target(R_Bar_coProduct.obj.horiz);
+		}
+		
+		Arr mu_R = getUserInput(R_i);
+		
+		Arr r_Prime = c.epiMonoFactorize(c.compose(r_Bar, mu_R)).second;
+		return r_Prime;
+	};
+	
+	private Arr getUserInput(Ob R_Bar) {
+		// Not yet implemented!
+		return null;
 	}
 }
