@@ -181,16 +181,16 @@ public class Graphs implements LabelledCategory<Graph, GraphMorphism>, CategoryW
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public Graph extract(Graph L, Graph L_Prime) {
-
-		// Graph baseGraph = new Graph("L~ base of " + L.label() " and " +
-		// L_Prime.label(), , vertices, source, target)
+		FinSet vertices = new FinSet("vertices of L~", new ArrayList<Object>());
+		TotalFunction sourceMap = new TotalFunction(vertices, "map edges to source object", vertices);
+		TotalFunction targetMap = new TotalFunction(vertices, "map edges to target object", vertices);
+		// helper to find faster vertices
+		HashSet<String> baseVertices = new HashSet<String>();
 
 		// extract same vertices based on label
 		java.util.function.Predicate innermatch = vertice -> L_Prime.vertices().elts().stream()
 				.anyMatch(innerVertice -> ((String) vertice).equals((String) innerVertice));
-		FinSet vertices = new FinSet("vertices of L~", new ArrayList<Object>());
 
-		HashSet<String> baseVertices = new HashSet<String>();
 		L.vertices().elts().stream().filter(innermatch).forEach(vertice -> {
 			vertices.elts().add(vertice);
 			baseVertices.add((String) vertice);
@@ -198,20 +198,23 @@ public class Graphs implements LabelledCategory<Graph, GraphMorphism>, CategoryW
 
 		// construct arrows
 		List<Object> edgesThatAreInBaseAndL = L.edges().elts().stream()
-				.filter(edge -> baseVertices.contains((String) L.src().map(edge))).collect(Collectors.toList());
+				.filter(edge -> baseVertices.contains((String) L.src().map(edge))
+						&& baseVertices.contains((String) L.trg().map(edge)))
+				.collect(Collectors.toList());
 
-		List<Object> edgesThatAreInBaseAndLAndLPrime = edgesThatAreInBaseAndL.stream()
-				.filter(edge -> baseVertices.contains((String) L_Prime.src().map(edge))).collect(Collectors.toList());
+		List<Object> edgesThatAreInBaseAndLAndLPrime = edgesThatAreInBaseAndL.stream().filter(edge -> {
+			Object source = L_Prime.src().map(edge);
+			Object target = L_Prime.trg().map(edge);
+			if (baseVertices.contains((String) source) && baseVertices.contains((String) target)) {
+				sourceMap.addMapping(edge, source);
+				targetMap.addMapping(edge, target);
+				return true;
+			}
+			return false;
+		}).collect(Collectors.toList());
 
-		List<Object> edgesThatAreInBaseAndLAndLPrimeWithTarget = edgesThatAreInBaseAndLAndLPrime.stream()
-				.filter(edge -> {
-					String targetL = (String) L.trg().map(edge);
-					String targetLPrime = (String) L_Prime.trg().map(edge);
-					return targetL.equals(targetLPrime) && baseVertices.contains(targetLPrime);
-				}).collect(Collectors.toList());
-		FinSet edges = new FinSet("edges of L~", edgesThatAreInBaseAndLAndLPrimeWithTarget);
-
-		return null;
+		FinSet edges = new FinSet("edges of L~", edgesThatAreInBaseAndLAndLPrime);
+		return new Graph("L~ of K and L'", edges, vertices, sourceMap, targetMap);
 	}
 
 	@Override
