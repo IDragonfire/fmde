@@ -4,7 +4,6 @@ import static org.upb.fmde.de.categories.concrete.finsets.FinSets.FinSets;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -22,8 +21,6 @@ import org.upb.fmde.de.categories.colimits.pushouts.Corner;
 import org.upb.fmde.de.categories.concrete.finsets.FinSet;
 import org.upb.fmde.de.categories.concrete.finsets.TotalFunction;
 import org.upb.fmde.de.rulerefinement.RuleRefinableCategory;
-
-import com.google.common.base.Predicate;
 
 public class Graphs implements LabelledCategory<Graph, GraphMorphism>, CategoryWithInitOb<Graph, GraphMorphism>,
 		CategoryWithPushouts<Graph, GraphMorphism>, CategoryWithPushoutComplements<Graph, GraphMorphism>,
@@ -184,8 +181,7 @@ public class Graphs implements LabelledCategory<Graph, GraphMorphism>, CategoryW
 	@Override
 	public Graph extract(Graph L, Graph L_Prime) {
 		FinSet vertices = new FinSet("vertices of L~", new ArrayList<Object>());
-		TotalFunction sourceMap = new TotalFunction(vertices, "map edges to source object", vertices);
-		TotalFunction targetMap = new TotalFunction(vertices, "map edges to target object", vertices);
+
 		// helper to find faster vertices
 		HashSet<String> baseVertices = new HashSet<String>();
 
@@ -207,15 +203,17 @@ public class Graphs implements LabelledCategory<Graph, GraphMorphism>, CategoryW
 		List<Object> edgesThatAreInBaseAndLAndLPrime = edgesThatAreInBaseAndL.stream().filter(edge -> {
 			Object source = L_Prime.src().map(edge);
 			Object target = L_Prime.trg().map(edge);
-			if (baseVertices.contains((String) source) && baseVertices.contains((String) target)) {
-				sourceMap.addMapping(edge, source);
-				targetMap.addMapping(edge, target);
-				return true;
-			}
-			return false;
+			return baseVertices.contains((String) source) && baseVertices.contains((String) target);
 		}).collect(Collectors.toList());
-
+		
 		FinSet edges = new FinSet("edges of L~", edgesThatAreInBaseAndLAndLPrime);
+		TotalFunction sourceMap = new TotalFunction(edges, "map edges to source object", vertices);
+		TotalFunction targetMap = new TotalFunction(edges, "map edges to target object", vertices);
+		edgesThatAreInBaseAndLAndLPrime.forEach(edge -> {
+			sourceMap.addMapping(edge, L.src().map(edge));
+			targetMap.addMapping(edge, L.trg().map(edge));
+		});
+
 		return new Graph("L~ of K and L'", edges, vertices, sourceMap, targetMap);
 	}
 
