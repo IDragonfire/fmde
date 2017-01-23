@@ -2,13 +2,13 @@ package org.upb.fmde.de.tests;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.upb.fmde.de.categories.concrete.finsets.FinSet;
 import org.upb.fmde.de.categories.concrete.finsets.TotalFunction;
 import org.upb.fmde.de.categories.concrete.graphs.Graph;
+import org.upb.fmde.de.categories.concrete.graphs.GraphDiagram;
 import org.upb.fmde.de.categories.concrete.graphs.GraphMorphism;
 import org.upb.fmde.de.categories.concrete.graphs.Graphs;
 import org.upb.fmde.de.rulerefinement.RuleRefiner;
@@ -28,6 +28,12 @@ public class TestRuleRefinement {
 		GraphMorphism appendRule = createRuleAppendCard();
 		GraphMorphism prependRule = createRulePreappendCard();
 		GraphMorphism refinedRule = refiner.refine(appendRule, prependRule);
+		GraphDiagram dia = new GraphDiagram();
+		dia.arrows(refinedRule);
+		dia.objects(refinedRule.src(), refinedRule.trg());
+
+		dia.prettyPrint(diagrams, "refineRule_.dot");;
+		
 		System.out.println(refinedRule);
 	}
 
