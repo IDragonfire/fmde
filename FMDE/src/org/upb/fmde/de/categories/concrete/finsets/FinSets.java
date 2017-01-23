@@ -2,6 +2,7 @@ package org.upb.fmde.de.categories.concrete.finsets;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Optional;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -121,5 +122,20 @@ public class FinSets implements LabelledCategory<FinSet, TotalFunction>,
 		d.mappings().putAll(l_m.mappings());
 		
 		return Optional.of(new Corner<>(this, d, l_));
+	}
+	
+	public Corner<TotalFunction> epiMonoFactorize(TotalFunction f) {
+		FinSet intermediateSet = new FinSet(f.label()+"_IntermediateSet", new ArrayList<Object>());
+		TotalFunction epi = new TotalFunction(f.src(), f.label()+"_epi", intermediateSet);
+		TotalFunction mono = new TotalFunction(intermediateSet, f.label()+"_mono", f.trg());
+		
+		for (Object key : f.mappings().values()) {
+			if (intermediateSet.elts().contains(f.map(key)))
+				intermediateSet.elts().add(f.map(key));
+			epi.addMapping(key, f.map(key));
+			mono.addMapping(f.map(key), f.map(key));
+		}
+		
+		return new Corner<TotalFunction>(this.FinSets, epi, mono);
 	}
 }
