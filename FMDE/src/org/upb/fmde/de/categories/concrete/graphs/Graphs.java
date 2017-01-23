@@ -23,6 +23,8 @@ import org.upb.fmde.de.categories.concrete.finsets.FinSet;
 import org.upb.fmde.de.categories.concrete.finsets.TotalFunction;
 import org.upb.fmde.de.rulerefinement.RuleRefinableCategory;
 
+import com.google.common.base.Predicate;
+
 public class Graphs implements LabelledCategory<Graph, GraphMorphism>, CategoryWithInitOb<Graph, GraphMorphism>,
 		CategoryWithPushouts<Graph, GraphMorphism>, CategoryWithPushoutComplements<Graph, GraphMorphism>,
 		RuleRefinableCategory<Graph, GraphMorphism> {
@@ -219,7 +221,21 @@ public class Graphs implements LabelledCategory<Graph, GraphMorphism>, CategoryW
 
 	@Override
 	public GraphMorphism buildArrow(Graph L_Tilde, Graph L) {
-		// TODO Auto-generated method stub
-		return null;
+		TotalFunction functionForEdges = new TotalFunction(L_Tilde.edges(), "edges arrows for L~ to L", L.edges());
+
+		L_Tilde.edges().elts().stream().forEach(leftEdge -> L.edges().elts().stream().forEach(rightEdge -> {
+			if (((String) leftEdge).equals((String) rightEdge)) {
+				functionForEdges.addMapping(leftEdge, rightEdge);
+			}
+		}));
+
+		TotalFunction functionForVertices = new TotalFunction(L_Tilde.vertices(), "vertices arrows for L~ to L",
+				L.vertices());
+		L_Tilde.vertices().elts().stream().forEach(leftVertice -> L.vertices().elts().stream().forEach(rightVertice -> {
+			if (((String) leftVertice).equals((String) rightVertice)) {
+				functionForVertices.addMapping(leftVertice, rightVertice);
+			}
+		}));
+		return new GraphMorphism("L~ to L Arrow", L_Tilde, L, functionForEdges, functionForVertices);
 	}
 }
