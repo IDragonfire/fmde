@@ -125,17 +125,20 @@ public class FinSets implements LabelledCategory<FinSet, TotalFunction>,
 	}
 	
 	public Corner<TotalFunction> epiMonoFactorize(TotalFunction f) {
+		// create an intermediate Set as target for the epi and source of the mono function
 		FinSet intermediateSet = new FinSet(f.label()+"_IntermediateSet", new ArrayList<Object>());
+		// create epi and mono functions
 		TotalFunction epi = new TotalFunction(f.src(), f.label()+"_epi", intermediateSet);
 		TotalFunction mono = new TotalFunction(intermediateSet, f.label()+"_mono", f.trg());
 		
-		for (Object key : f.mappings().values()) {
-			if (intermediateSet.elts().contains(f.map(key)))
+		// add mappings to the epi and mono functions
+		for (Object key : f.mappings().keySet()) {
+			if (!intermediateSet.elts().contains(f.map(key)))
 				intermediateSet.elts().add(f.map(key));
 			epi.addMapping(key, f.map(key));
 			mono.addMapping(f.map(key), f.map(key));
 		}
 		
-		return new Corner<TotalFunction>(this.FinSets, epi, mono);
+		return new Corner<TotalFunction>(FinSets, epi, mono);
 	}
 }

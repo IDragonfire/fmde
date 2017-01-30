@@ -1,8 +1,10 @@
 package org.upb.fmde.de.categories.concrete.tgraphs;
 
+import static org.upb.fmde.de.categories.concrete.finsets.FinSets.FinSets;
 import static org.upb.fmde.de.categories.concrete.graphs.Graphs.Graphs;
 
 import java.util.Optional;
+import java.util.Map.Entry;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.upb.fmde.de.categories.LabelledCategory;
@@ -135,5 +137,44 @@ public class TGraphs implements LabelledCategory<TGraph, TGraphMorphism>,
 		
 		return new Corner<>(this, new TGraphMorphism("_m_", untyped.first, upperLeft.first.trg(), _G_),
 								  new TGraphMorphism("_g_", untyped.second, _G_, G));
+	}
+	
+	public Corner<TGraphMorphism> epiMonoFactorize(TGraphMorphism f) {
+		
+		// create GraphMorphisms by using the epiMonoFactorization of Graph
+		Corner<GraphMorphism> f_epiMono = Graphs.epiMonoFactorize(f.untyped());
+
+		// create the type GraphMorphism for the intermediate TGraph
+		TotalFunction type_f_V = new TotalFunction(f_epiMono.first.trg().vertices(), "f_V", f.src().type().trg().vertices());
+		TotalFunction type_f_E = new TotalFunction(f_epiMono.first.trg().edges(), "f_E", f.src().type().trg().edges());
+		
+		// add mappings for src and trg functions of the intermediate graph
+		for (Object vertex : f_epiMono.first.trg().vertices().elts()) {
+			Optional<Entry<Object, Object>> sourceVertex = f_epiMono.first._V().mappings().entrySet().stream()
+				.filter(v -> v.getValue().equals(vertex)).findFirst();
+			if (sourceVertex.isPresent()) {
+				Object targetVertex = f.src().type()._V().map(sourceVertex.get());
+				type_f_V.addMapping(vertex, targetVertex);
+			}
+		}
+		for (Object edge : f_epiMono.first.trg().edges().elts()) {
+			Optional<Entry<Object, Object>> sourceEdge = f_epiMono.first._E().mappings().entrySet().stream()
+				.filter(e -> e.getValue().equals(edge)).findFirst();
+			if (sourceEdge.isPresent()) {
+				Object targetEdge = f.src().type()._V().map(sourceEdge.get());
+				type_f_V.addMapping(edge, targetEdge);
+			}
+		}
+		
+		GraphMorphism type = new GraphMorphism("type", f_epiMono.first.trg(), typeGraph, type_f_E, type_f_V);
+
+		// create an intermediate TGraph as target for the epi and source of the mono TGraphMorphisms
+		TGraph intermediateGraph = new TGraph(f.label()+"_IntermediateTGraph", type);
+
+		// create epi and mono TGraphMorphisms
+		TGraphMorphism epi = new TGraphMorphism(f.label()+"_epi", f_epiMono.first, f.src(), intermediateGraph);
+		TGraphMorphism mono = new TGraphMorphism(f.label()+"_mono", f_epiMono.second, intermediateGraph, f.trg());
+		
+		return new Corner<TGraphMorphism>(TGraphsFor(f.src().type().trg()), epi, mono);
 	}
 }

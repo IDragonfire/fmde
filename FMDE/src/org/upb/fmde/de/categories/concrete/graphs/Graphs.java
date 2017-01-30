@@ -2,9 +2,11 @@ package org.upb.fmde.de.categories.concrete.graphs;
 
 import static org.upb.fmde.de.categories.concrete.finsets.FinSets.FinSets;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -188,5 +190,44 @@ public class Graphs implements LabelledCategory<Graph, GraphMorphism>,
 		GraphMorphism _m_ = new GraphMorphism("_m_", L, _g_.src(), _m_E, _m_V);
 		
 		return new Corner<>(this, _m_, _g_);
+	}
+	
+	public Corner<GraphMorphism> epiMonoFactorize(GraphMorphism f) {
+		
+		// create f_V and f_E epiMonoFactorization by using the FinSets method
+		Corner<TotalFunction> f_v_epiMono = FinSets.epiMonoFactorize(f._V());
+		TotalFunction epi_v = f_v_epiMono.first;
+		TotalFunction mono_v = f_v_epiMono.second;
+
+		Corner<TotalFunction> f_e_epiMono = FinSets.epiMonoFactorize(f._E());
+		TotalFunction epi_e = f_e_epiMono.first;
+		TotalFunction mono_e = f_e_epiMono.second;
+		
+		// create src and trg functions for the intermediate graph
+		TotalFunction intermediate_src = new TotalFunction(epi_e.trg() ,"source", epi_v.trg());
+		TotalFunction intermediate_trg = new TotalFunction(epi_e.trg() ,"target", epi_v.trg());
+		
+		// add mappings for src and trg functions of the intermediate graph
+		for (Entry<Object, Object> entry : f.trg().src().mappings().entrySet()) {
+			if (epi_e.trg().elts().contains(entry.getKey()))
+				intermediate_src.addMapping(entry.getKey(), entry.getValue());
+		}
+		for (Entry<Object, Object> entry : f.trg().trg().mappings().entrySet()) {
+			if (epi_e.trg().elts().contains(entry.getKey()))
+				intermediate_src.addMapping(entry.getKey(), entry.getValue());
+		}
+
+		// create an intermediate Graph as target for the epi and source of the mono GraphMorphisms
+		Graph intermediateGraph = new Graph(f.label()+"_IntermediateGraph",
+											epi_v.trg(),
+											epi_e.trg(),
+											intermediate_src,
+											intermediate_trg);
+
+		// create epi and mono GraphMorphisms
+		GraphMorphism epi = new GraphMorphism(f.label()+"_epi", f.src(), intermediateGraph, epi_e, epi_v);
+		GraphMorphism mono = new GraphMorphism(f.label()+"_mono", intermediateGraph, f.trg(), mono_e, mono_v);
+		
+		return new Corner<GraphMorphism>(Graphs, epi, mono);
 	}
 }
