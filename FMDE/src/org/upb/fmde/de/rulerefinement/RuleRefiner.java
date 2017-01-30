@@ -45,7 +45,7 @@ public class RuleRefiner<
 		return rule_r_star;
 	}
 	
-	public Arr merge(List<Arr> rules) {
+	public Arr preMerge(List<Arr> rules) {
 		if (rules.size() < 1)
 			throw new IllegalArgumentException("List must contain at least one rule!");
 		else if (rules.size() == 1)
@@ -64,19 +64,23 @@ public class RuleRefiner<
 			r_Bar = L_Bar_coProduct.up.apply(new CoSpan<Arr>(c,
 															 c.compose(r_Bar, R_Bar_coProduct.obj.vert),
 															 c.compose(rules.get(i), R_Bar_coProduct.obj.horiz)));
-			
 			L_i = c.target(L_Bar_coProduct.obj.horiz);
 			R_i = c.target(R_Bar_coProduct.obj.horiz);
 		}
 		
-		Arr mu_R = getUserInput(R_i);
-		
-		Arr r_Prime = c.epiMonoFactorize(c.compose(r_Bar, mu_R)).second;
-		return r_Prime;
+		return r_Bar;
 	};
 	
-	private Arr getUserInput(Ob R_Bar) {
-		// Not yet implemented!
-		return null;
+	public Arr merge(Arr r_Bar, Arr mu_R) {
+		Arr r_Prime = c.epiMonoFactorize(c.compose(r_Bar, mu_R)).second;
+		return r_Prime;
+	}
+	
+	public Arr mergeOnLabels(List<Arr> rules) {
+		Arr r_Bar = preMerge(rules);
+		Ob R_Bar = this.c.target(r_Bar);
+		Arr match = this.c.matchOnLabels(R_Bar);
+		
+		return merge(r_Bar, match);
 	}
 }

@@ -21,4 +21,6 @@ public interface RuleRefinableCategory<Ob, Arr>
 	public Arr buildArrow(Ob L_Tilde, Ob L);
 	
 	public Corner<Arr> epiMonoFactorize(Arr a);
+	
+	public Arr matchOnLabels(Ob o);
 }

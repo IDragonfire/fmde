@@ -141,4 +141,21 @@ public class FinSets implements LabelledCategory<FinSet, TotalFunction>,
 		
 		return new Corner<TotalFunction>(FinSets, epi, mono);
 	}
+	
+	public TotalFunction matchOnLabels(FinSet set) {
+		// does not work this way!!!
+		FinSet target = new FinSet("target", new ArrayList<Object>());
+		TotalFunction match = new TotalFunction(set, "mu_R", target);
+		
+		for (Object e : set.elts()) {
+			if (target.elts().contains(e)) {
+				match.addMapping(e, e);
+			} else {
+				target.elts().add(e);
+				match.addMapping(e, e);
+			}
+		}
+			
+		return match;
+	}
 }
