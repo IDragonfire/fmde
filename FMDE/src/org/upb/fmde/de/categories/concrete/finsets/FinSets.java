@@ -143,12 +143,12 @@ public class FinSets implements LabelledCategory<FinSet, TotalFunction>,
 	}
 	
 	public TotalFunction matchOnLabels(FinSet set) {
-		// does not work this way!!!
+
 		FinSet target = new FinSet("target", new ArrayList<Object>());
 		TotalFunction match = new TotalFunction(set, "mu_R", target);
 		
 		for (Object e : set.elts()) {
-			if (target.elts().contains(e)) {
+			if (target.elts().stream().anyMatch(elem -> elem.toString().equals(e.toString()))) {
 				match.addMapping(e, e);
 			} else {
 				target.elts().add(e);

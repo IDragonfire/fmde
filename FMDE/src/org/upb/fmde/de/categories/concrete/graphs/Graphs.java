@@ -181,7 +181,7 @@ public class Graphs implements LabelledCategory<Graph, GraphMorphism>, CategoryW
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public Graph extract(Graph L, Graph L_Prime) {
-		FinSet vertices = new FinSet("vertices of L~", new ArrayList<Object>());
+		FinSet vertices = new FinSet("vertices of "+L.label()+"~", new ArrayList<Object>());
 		// helper to find faster vertices
 		HashSet<String> baseVertices = new HashSet<String>();
 
@@ -206,7 +206,7 @@ public class Graphs implements LabelledCategory<Graph, GraphMorphism>, CategoryW
 			return baseVertices.contains((String) source) && baseVertices.contains((String) target);
 		}).collect(Collectors.toList());
 		
-		FinSet edges = new FinSet("edges of L~", edgesThatAreInBaseAndLAndLPrime);
+		FinSet edges = new FinSet("edges of "+L.label()+"~", edgesThatAreInBaseAndLAndLPrime);
 		TotalFunction sourceMap = new TotalFunction(edges, "map edges to source object", vertices);
 		TotalFunction targetMap = new TotalFunction(edges, "map edges to target object", vertices);
 		edgesThatAreInBaseAndLAndLPrime.forEach(edge -> {
@@ -214,7 +214,7 @@ public class Graphs implements LabelledCategory<Graph, GraphMorphism>, CategoryW
 			targetMap.addMapping(edge, L.trg().map(edge));
 		});
 
-		return new Graph("L~ of K and L'", edges, vertices, sourceMap, targetMap);
+		return new Graph(L.label()+"~ of "+L.label()+" and "+L_Prime.label(), edges, vertices, sourceMap, targetMap);
 	}
 
 	@Override
@@ -234,9 +234,10 @@ public class Graphs implements LabelledCategory<Graph, GraphMorphism>, CategoryW
 				functionForVertices.addMapping(leftVertice, rightVertice);
 			}
 		}));
-		return new GraphMorphism("L~ to L Arrow", L_Tilde, L, functionForEdges, functionForVertices);
+		return new GraphMorphism(L_Tilde.label()+" to "+L.label()+" Arrow", L_Tilde, L, functionForEdges, functionForVertices);
 	}
 	
+	@Override
 	public Corner<GraphMorphism> epiMonoFactorize(GraphMorphism f) {
 		
 		// create f_V and f_E epiMonoFactorization by using the FinSets method
@@ -264,8 +265,8 @@ public class Graphs implements LabelledCategory<Graph, GraphMorphism>, CategoryW
 
 		// create an intermediate Graph as target for the epi and source of the mono GraphMorphisms
 		Graph intermediateGraph = new Graph(f.label()+"_IntermediateGraph",
-											epi_v.trg(),
 											epi_e.trg(),
+											epi_v.trg(),
 											intermediate_src,
 											intermediate_trg);
 
@@ -274,5 +275,23 @@ public class Graphs implements LabelledCategory<Graph, GraphMorphism>, CategoryW
 		GraphMorphism mono = new GraphMorphism(f.label()+"_mono", intermediateGraph, f.trg(), mono_e, mono_v);
 		
 		return new Corner<GraphMorphism>(Graphs, epi, mono);
+	}
+	
+	@Override
+	public GraphMorphism matchOnLabels(Graph graph) {
+		TotalFunction f_V = FinSets.matchOnLabels(graph.vertices());
+		TotalFunction f_E = FinSets.matchOnLabels(graph.edges());
+		
+		TotalFunction src = new TotalFunction(f_E.trg(), "src", f_V.trg());
+		TotalFunction trg = new TotalFunction(f_E.trg(), "src", f_V.trg());
+		
+		for (Object edge : f_E.trg().elts()) {
+			src.addMapping(edge, f_V.map(graph.src().map(edge)));
+			trg.addMapping(edge, f_V.map(graph.trg().map(edge)));
+		}
+		
+		Graph targetGraph = new Graph(graph.label()+"_labelMerged", f_E.trg(), f_V.trg(), src, trg);
+		
+		return new GraphMorphism(graph.label()+"_labelMerge", graph, targetGraph, f_E, f_V);
 	}
 }
